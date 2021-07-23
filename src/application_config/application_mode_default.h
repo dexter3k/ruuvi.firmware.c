@@ -10,6 +10,10 @@
  * Default configuration for Ruuvi Firmware.
  */
 
+#define RI_LOG_ENABLED 1
+//#define APP_LOG_LEVEL RI_LOG_LEVEL_DEBUG
+#define APP_LOG_LEVEL RI_LOG_LEVEL_INFO
+
 /**
  * @brief name for Device Information Service.
  */

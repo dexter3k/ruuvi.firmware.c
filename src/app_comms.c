@@ -8,6 +8,7 @@
 #include "ruuvi_interface_communication.h"
 #include "ruuvi_interface_communication_ble_advertising.h"
 #include "ruuvi_interface_communication_radio.h"
+#include "ruuvi_interface_log.h"
 #include "ruuvi_interface_rtc.h"
 #include "ruuvi_interface_scheduler.h"
 #include "ruuvi_interface_timer.h"
@@ -265,6 +266,8 @@ static
 #endif
 void on_gatt_connected_isr (void * p_data, size_t data_len)
 {
+    ri_log (RI_LOG_LEVEL_INFO, "GATT IS CONNECTED ISR");
+
     rd_status_t err_code = RD_SUCCESS;
     err_code |= ri_scheduler_event_put (p_data, (uint16_t) data_len,
                                         &handle_gatt_connected);

@@ -25,6 +25,10 @@
 #include "ruuvi_task_gatt.h"
 #include "ruuvi_task_nfc.h"
 
+#include <string.h>
+
+#include "app_ensto.h"
+
 #define U8_MASK (0xFFU)
 
 static ri_timer_id_t heart_timer; //!< Timer for updating data.
@@ -111,6 +115,9 @@ void heartbeat (void * p_event, uint16_t event_size)
     }
 
     err_code = send_adv (&msg);
+    // TODO: sending adv while listening adv causes queue overflow!
+    // Increasing queue size helps, but only temporarily
+    // Also overflows do not seem to significantly affect anything
     // Advertising should always be successful
     RD_ERROR_CHECK (err_code, ~RD_ERROR_FATAL);
 
@@ -123,18 +130,39 @@ void heartbeat (void * p_event, uint16_t event_size)
     msg.data_length = 18;
     // Gatt Link layer takes care of delivery.
     msg.repeat_count = 1;
-    err_code = rt_gatt_send_asynchronous (&msg);
 
+    // Send NFC first because we are going to edit the data!
+    err_code = rt_nfc_send (&msg);
     if (RD_SUCCESS == err_code)
     {
         heartbeat_ok = true;
     }
 
-    err_code = rt_nfc_send (&msg);
+    static int dev_index = -1;
+    if (tags_used_entries != 0) {
+        ri_comm_message_t msg2 = {0};
+        msg2.data_length = 18;
+        msg2.repeat_count = 1;
 
-    if (RD_SUCCESS == err_code)
-    {
-        heartbeat_ok = true;
+        uint8_t * data = msg2.data;
+        for (int i = 0; i < 2; i++) {
+            dev_index++;
+            if (dev_index >= tags_used_entries) {
+                dev_index = 0;
+            }
+
+            memcpy(data, tags_around[dev_index].addr, BLE_MAC_ADDRESS_LENGTH);
+            data[6] = tags_around[dev_index].rssi;
+            data[7] = (tags_around[dev_index].reps & 0xff00) >> 8;
+            data[8] = (tags_around[dev_index].reps & 0xff) >> 0;
+            data = data + 9;
+        }
+
+        err_code = rt_gatt_send_asynchronous (&msg2);
+        if (RD_SUCCESS == err_code)
+        {
+            heartbeat_ok = true;
+        }
     }
 
     if (heartbeat_ok)
