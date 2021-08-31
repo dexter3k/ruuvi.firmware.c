@@ -66,8 +66,8 @@ void app_on_error (const rd_status_t error,
 my_data_entry tags_around[MAX_ENTRIES] = {};
 int tags_used_entries = 0;
 
-// if found, idx_out = index of the entry
-// not found, idx_out = potential index of the entry
+// if found, return 0, idx_out = index of the entry
+// not found, return -1, idx_out = potential index of the entry
 int find_tag_idx(uint8_t const * addr, int * idx_out) {
     if (tags_used_entries == 0) {
         *idx_out = 0;

@@ -17,6 +17,9 @@
 #include "ruuvi_task_communication.h"
 #include "ruuvi_task_gatt.h"
 #include "ruuvi_task_nfc.h"
+
+#include "app_ensto.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -250,6 +253,9 @@ static
 #endif
 void handle_gatt_connected (void * p_data, uint16_t data_len)
 {
+    tags_used_entries = 0;
+    rt_adv_scan_start (my_on_scan_isr);
+
     rd_status_t err_code = RD_SUCCESS;
     // Disables advertising for GATT, does not kick current connetion out.
     rt_gatt_adv_disable ();

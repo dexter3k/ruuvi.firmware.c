@@ -16,4 +16,6 @@ extern my_data_entry tags_around[MAX_ENTRIES];
 
 extern int tags_used_entries;
 
+rd_status_t my_on_scan_isr (const ri_comm_evt_t evt, void * p_data, size_t data_len);
+
 #endif // APP_ENSTO_H
